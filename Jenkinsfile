@@ -3,7 +3,6 @@ pipeline {
  
     tools {
         // Ensure these tool versions are available in your Jenkins configuration
-        maven 'Maven-3.6.3' // Replace with your Maven version
         jdk 'JDK-11' // Replace with your JDK version
     }
  
@@ -17,14 +16,16 @@ pipeline {
  
         stage('Build') {
             steps {
-                // Building the project with Maven
-                if (isUnix()) {
-					withMaven(maven: 'Maven-3.6.3-Linux') {
-						sh 'mvn clean package -DskipTests'
-					}
-				} else {
-					withMaven(maven: 'Maven-3.6.3') {
-						bat 'mvn clean package -DskipTests'
+				script {
+					// Building the project with Maven
+					if (isUnix()) {
+						withMaven(maven: 'Maven-3.6.3-Linux') {
+							sh 'mvn clean package -DskipTests'
+						}
+					} else {
+						withMaven(maven: 'Maven-3.6.3') {
+							bat 'mvn clean package -DskipTests'
+						}
 					}
 				}
             }
@@ -32,14 +33,16 @@ pipeline {
  
         stage('Test') {
             steps {
-                // Runnings tests
-                if (isUnix()) {
-					withMaven(maven: 'Maven-3.6.3-Linux') {
-						sh 'mvn test'
-					}
-				} else {
-					withMaven(maven: 'Maven-3.6.3') {
-						bat 'mvn test'
+				script {
+					// Runnings tests
+					if (isUnix()) {
+						withMaven(maven: 'Maven-3.6.3-Linux') {
+							sh 'mvn test'
+						}
+					} else {
+						withMaven(maven: 'Maven-3.6.3') {
+							bat 'mvn test'
+						}
 					}
 				}
             }

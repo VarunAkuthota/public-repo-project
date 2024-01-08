@@ -1,0 +1,44 @@
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+cache:
+  paths:
+    - .m2/repository/
+
+before_script:
+  - 'which java'
+  - 'java -version'
+  - 'which mvn'
+  - 'mvn --version'
+
+test:
+  stage: test
+  script:
+    - 'mvn $MAVEN_CLI_OPTS test'
+
+build:
+  stage: build
+  script:
+    - 'mvn $MAVEN_CLI_OPTS package'
+  artifacts:
+    paths:
+      - target/*.jar
+
+deploy:
+  stage: deploy
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - $(aws ecr get-login --no-include-email --region your-region)
+    - docker build -t your-image-name .
+    - docker tag your-image-name:latest your-ecr-url/your-image-name:latest
+    - docker push your-ecr-url/your-image-name:latest
+  only:
+    - master

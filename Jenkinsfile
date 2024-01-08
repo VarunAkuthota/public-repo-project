@@ -19,7 +19,13 @@ pipeline {
             steps {
                 // Building the project with Maven
                 withMaven(maven: 'Maven-3.6.3') {
-                    sh 'mvn clean package'
+                    script {
+                        if (isUnix()) {
+                            sh 'mvn clean package'
+                        } else {
+                            bat 'mvn clean package'
+                        }
+                    }
                 }
             }
         }
@@ -28,12 +34,17 @@ pipeline {
             steps {
                 // Running tests
                 withMaven(maven: 'Maven-3.6.3') {
-                    sh 'mvn test'
+                    script {
+                        if (isUnix()) {
+                            sh 'mvn test'
+                        } else {
+                            bat 'mvn test'
+                        }
+                    }
                 }
             }
         }
 
         // Additional stages like 'Deploy' can be added here if necessary
-
     }
 }

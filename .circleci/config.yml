@@ -1,47 +1,38 @@
 version: 2.1
-
 orbs:
-  maven: circleci/maven@1.0.0  # Maven Orb for simplified Maven commands
-
+  maven: circleci/maven@1.0.0
 jobs:
   test:
     docker:
-      - image: cimg/openjdk:8.0  # Docker image with JDK 8
-    environment:
-      MAVEN_CLI_OPTS: "--batch-mode"  # Updated to remove the settings file reference
-      MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+      - image: cimg/openjdk:8.0
     steps:
       - checkout
       - restore_cache:
           keys:
             - m2-repo-{{ checksum "pom.xml" }}
-      - run: mvn $MAVEN_CLI_OPTS test
+      - run: mvn test
       - save_cache:
           paths:
             - ~/.m2
           key: m2-repo-{{ checksum "pom.xml" }}
-
   build:
     docker:
       - image: cimg/openjdk:8.0
-    environment:
-      MAVEN_CLI_OPTS: "--batch-mode"  # Updated here as well
     steps:
       - checkout
       - restore_cache:
           keys:
             - m2-repo-{{ checksum "pom.xml" }}
-      - run: mvn $MAVEN_CLI_OPTS package
+      - run: mvn clean package
       - persist_to_workspace:
           root: ~/repo
           paths:
             - target/*.jar
-
-  workflows:
-    version: 2
-    build_and_test:
-      jobs:
-        - test
-        - build:
-            requires:
-              - test
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - test
+      - build:
+          requires:
+            - test

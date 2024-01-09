@@ -2,12 +2,11 @@ version: 2.1
 
 orbs:
   maven: circleci/maven@1.0.0  # Maven Orb for simplified Maven commands
-  java: circleci/openjdk@1.0.0 # Java Orb for setting up Java environments
 
 jobs:
   test:
     docker:
-      - image: cimg/openjdk:1.8.0  # Docker image with JDK 1.8
+      - image: cimg/openjdk:8.0  # Docker image with JDK 8
     environment:
       MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
       MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
@@ -16,10 +15,7 @@ jobs:
       - restore_cache:
           keys:
             - m2-repo-{{ checksum "pom.xml" }}
-      - java/install
-      - maven/with_cache:
-          steps:
-            - run: mvn $MAVEN_CLI_OPTS test
+      - run: mvn $MAVEN_CLI_OPTS test
       - save_cache:
           paths:
             - ~/.m2
@@ -27,7 +23,7 @@ jobs:
 
   build:
     docker:
-      - image: cimg/openjdk:1.8.0
+      - image: cimg/openjdk:8.0
     environment:
       MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
     steps:
@@ -35,15 +31,12 @@ jobs:
       - restore_cache:
           keys:
             - m2-repo-{{ checksum "pom.xml" }}
-      - java/install
-      - maven/with_cache:
-          steps:
-            - run: mvn $MAVEN_CLI_OPTS package
+      - run: mvn $MAVEN_CLI_OPTS package
       - persist_to_workspace:
           root: ~/repo
           paths:
             - target/*.jar
-
+            
 workflows:
   version: 2
   build_and_test:
